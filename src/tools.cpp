@@ -17,7 +17,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   // check validity of input data
   if(estimations.size() != ground_truth.size() || estimations.size() == 0) {
     cout<<"Invalid estimation or ground_truth data"<<endl;
-    return
+    return rmse;
   }
 
   // iterate through the estimations and ground_truth arrays
@@ -49,7 +49,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float vx = x_state(2);
   float vy = x_state(3);
 
-  //preset variables to avoid repeated caculations
+  //preset variables to avoid repeated calculations
   float c1 = px*px+py*py;
   float c2 = sqrt(c1);
   float c3 = (c1*c2);
@@ -67,3 +67,34 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   return Hj;
 }
+
+VectorXd Tools::ConvertCartesianToPolar(const VectorXd& x_state) {
+  VectorXd polar_measurements(3);
+
+  //recover state parameters
+  float px = x_state(0);
+  float py = x_state(1);
+  float vx = x_state(2);
+  float vy = x_state(3);
+
+  //preset variable to avoid repeated calculations
+  float c1 = px*px+py*py;
+
+  float rho = sqrt(c1);
+  float phi = atan2(py, px);
+  float rho_dot = (px*vx+py*vy)/rho;
+
+  polar_measurements<<rho,phi,rho_dot;
+
+  return polar_measurements;
+}
+
+/* TODO: implement this
+VectorXd Tools::ConvertPolarToCartesian(const vector<VectorXd> &polar_measurements) {
+  VectorXd cartesian_measurements(3);
+  cartesian_measurements<<0,0,0,0;
+
+  //rho
+  // float rho =
+}
+*/
