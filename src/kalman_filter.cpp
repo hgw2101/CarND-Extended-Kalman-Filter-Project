@@ -7,6 +7,8 @@ using Eigen::VectorXd;
 
 using namespace std;
 
+#define PI 3.14159265
+
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
@@ -49,44 +51,28 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Extended Kalman Filter equations
-  */
-
-  // cout<<"z_pred"<<endl;
 
   VectorXd z_pred = tools.ConvertCartesianToPolar(x_);
   VectorXd y = z - z_pred;
 
+  // normalize y
+  // I thought you normalize the phi in z_pred, but of course you should
+  // do this to the phi in y, since z_pred will always have a normalized
+  // phi using the atan2() function. This took me days to resolve!!!
+  while (y(1) > PI) {
+    y(1) -= PI;
+  }
+  while (y(1) < -PI) {
+    y(1) += PI;
+  }
+
   MatrixXd Hj = H_; // H_ is set to Jacobian matrix by FusionEKF
-
-  // cout<<"MatrixXd Hjt = Hj.transpose();"<<endl;
-
   MatrixXd Hjt = Hj.transpose();
-
-  // cout<<"MatrixXd S = Hj * P_ * Hjt + R_;"<<endl;
-
-  // cout<<"this is Hj: "<<Hj<<endl;
-  // cout<<"this is P_: "<<P_<<endl;
-  // cout<<"this is Hjt: "<<Hjt<<endl;
-  // cout<<"this is R_: "<<R_<<endl;
-
   MatrixXd S = Hj * P_ * Hjt + R_;
-
-  // cout<<"MatrixXd Si = S.inverse();"<<endl;
-
   MatrixXd Si = S.inverse();
-
-  // cout<<"MatrixXd PHjt = P_ * Hjt;"<<endl;
-
   MatrixXd PHjt = P_ * Hjt;
-
-  // cout<<"MatrixXd K = PHjt * Si;"<<endl;
-
   MatrixXd K = PHjt * Si; // kalman gain
 
-  // cout<<"x_ = x_ + (K * y);"<<endl;
   // new estimate
   x_ = x_ + (K * y);
   long x_size = x_.size();

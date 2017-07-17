@@ -56,7 +56,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   //check division by 0, check absolute value of c1
   if(fabs(c1) < 0.0001) {
-    cout<<"CalculateJacobian Error: Division by 0"<<endl;
+    cout<<"-----CalculateJacobian Error: Division by 0"<<endl;
     return Hj;
   }
 
@@ -80,6 +80,12 @@ VectorXd Tools::ConvertCartesianToPolar(const VectorXd& x_state) {
   //preset variable to avoid repeated calculations
   float c1 = px*px+py*py;
 
+  //check division by 0, check absolute value of c1
+  if(fabs(c1) < 0.0001) {
+    cout<<"----------ConvertCartesianToPolar, CalculateJacobian Error: Division by 0"<<endl;
+    return polar_measurements;
+  }
+
   float rho = sqrt(c1);
   float phi = atan2(py, px);
   float rho_dot = (px*vx+py*vy)/rho;
@@ -89,7 +95,8 @@ VectorXd Tools::ConvertCartesianToPolar(const VectorXd& x_state) {
   return polar_measurements;
 }
 
-/* TODO: implement this
+/* TODO: implement this as an extra credit exercise so we can do dataset 2 with
+the initialization measurements using Radar data
 VectorXd Tools::ConvertPolarToCartesian(const vector<VectorXd> &polar_measurements) {
   VectorXd cartesian_measurements(3);
   cartesian_measurements<<0,0,0,0;

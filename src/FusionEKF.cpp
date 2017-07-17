@@ -66,8 +66,6 @@ FusionEKF::FusionEKF() {
   Hj_ << 0,0,0,0,
          0,0,0,0,
          0,0,0,0;
-  // Hj_ = tools.CalculateJacobian(x_); // TODO: CAN I DO THIS in initialization???
-
 }
 
 /**
@@ -93,8 +91,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
 
-    // cout<<"2"<<endl;
-
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
@@ -111,8 +107,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_(0) = measurement_pack.raw_measurements_[0];
       ekf_.x_(1) = measurement_pack.raw_measurements_[1];
     }
-
-    // cout<<"3"<<endl;
 
     previous_timestamp_ = measurement_pack.timestamp_;
 
@@ -156,7 +150,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.Q_(3,1) = dt_3/2*noise_ay_;
   ekf_.Q_(3,3) = dt_2*noise_ay_;
 
-  // cout<<"4"<<endl;
   ekf_.Predict();
 
   /*****************************************************************************
@@ -169,26 +162,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the state and covariance matrices.
    */
 
-  // cout<<"5"<<endl;
-
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-    // cout<<"measurement_pack.sensor_type_ == MeasurementPackage::RADAR"<<endl;
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.H_ = Hj_;
     ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-    // cout<<"3"<<endl;
   } else {
-    // cout<<"measurement_pack.sensor_type_ == MeasurementPackage::LASER"<<endl;
     // Laser updates
     ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
-    // cout<<"4"<<endl;
   }
-
-  // cout<<"6"<<endl;
 
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
